@@ -592,13 +592,15 @@ else {
 
 // Auto-play last played item if indicated
 if ($_SESSION['autoplay'] == '1') {
+	// custom autoplay logic for better 'random shuffle'
 	workerLog('worker: Auto-play (On)');
 	$hwparams = parseHwParams(shell_exec('cat /proc/asound/card' . $_SESSION['cardnum'] . '/pcm0p/sub0/hw_params'));
 	workerLog('worker: ALSA output (' . $hwparams['status'] . ')');
-	$status = parseStatus(getMpdStatus($sock));
-	sendMpdCmd($sock, 'playid ' . $status['songid']);
+	sendMpdCmd($sock, 'clear');
+	sysCmd('/usr/local/bin/ashuffle -o 200');
+	sendMpdCmd($sock, 'play');
 	$resp = readMpdResp($sock);
-	workerLog('worker: Auto-playing id (' . $status['songid'] . ')');
+	workerLog('worker: Auto-playing');
 	$hwparams = parseHwParams(shell_exec('cat /proc/asound/card' . $_SESSION['cardnum'] . '/pcm0p/sub0/hw_params'));
 	workerLog('worker: ALSA output (' . $hwparams['status'] . ')');
 }
